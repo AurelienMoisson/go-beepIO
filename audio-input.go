@@ -5,11 +5,10 @@ import (
 )
 
 const (
-	sampleRate = 44100
-	bufferSize = 1024
-	baseFrequency = sampleRate/bufferSize
+	sampleRate    = 44100
+	bufferSize    = 1024
+	baseFrequency = sampleRate / bufferSize
 )
-
 
 func audioListener(bufferChannel chan<- []int32) {
 
@@ -33,7 +32,6 @@ func StartAudioListener() <-chan []int32 {
 	go audioListener(bufferChannel)
 	return bufferChannel
 }
-
 
 func chk(err error) {
 	if err != nil {

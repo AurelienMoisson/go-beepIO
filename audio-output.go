@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/gordonklaus/portaudio"
 	"fmt"
+	"github.com/gordonklaus/portaudio"
 )
 
 var wave_function []float64
@@ -10,7 +10,7 @@ var wave_function []float64
 func audioWriter(commandsChannel <-chan []int) {
 	buffer := make([]int32, bufferSize)
 
-	stream, err := portaudio.OpenDefaultStream(0,1,44100, bufferSize, buffer)
+	stream, err := portaudio.OpenDefaultStream(0, 1, 44100, bufferSize, buffer)
 	chk(err)
 
 	chk(stream.Start())
@@ -22,10 +22,10 @@ func audioWriter(commandsChannel <-chan []int) {
 			fmt.Println("received chord: ", chord)
 		default:
 		}
-		for i,_ := range(buffer) {
+		for i, _ := range buffer {
 			value := 0.
-			for _,k := range(chord) {
-				value += wave_function[(i*k) % bufferSize]
+			for _, k := range chord {
+				value += wave_function[(i*k)%bufferSize]
 			}
 			buffer[i] = int32(value)
 		}
