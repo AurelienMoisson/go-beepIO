@@ -26,7 +26,7 @@ func audioWriter(commandsChannel <-chan []int) {
 			for _, k := range chord {
 				value += wave_function[(i*k)%bufferSize]
 			}
-			buffer[i] = int32(value*maxInt32)
+			buffer[i] = int32(value * maxInt32)
 		}
 		stream.Write()
 	}

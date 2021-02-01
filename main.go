@@ -37,7 +37,7 @@ func main() {
 		buffer := <-audioBufferChannel
 		line := ""
 		amplitudes := GetAmplitudes(buffer)
-		for _, v := range amplitudes[16:32] {
+		for _, v := range amplitudes[10:32] {
 			line += getBar(v/2, 8) + "|"
 		}
 		projections := GetProjections(amplitudes, [][]int{[]int{16, 20, 23}, []int{18, 22, 25}})
