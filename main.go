@@ -39,9 +39,15 @@ func main() {
 	for {
 		buffer := <-audioBufferChannel
 		line := ""
-		for _, v := range(GetAmplitudes(buffer)[16:32]) {
+		amplitudes := GetAmplitudes(buffer)
+		for _, v := range(amplitudes[16:32]) {
 			line += getBar(v/2, 8) + "|"
 		}
-		fmt.Println(line)
+		projections := GetProjections(amplitudes, [][]int{[]int{16,20,23}, []int{18,22,25}})
+		projections_percents := []int{
+			int(projections[0]*100.),
+			int(projections[1]*100.),
+		}
+		fmt.Println(line, " ", projections_percents)
 	}
 }
