@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/gordonklaus/portaudio"
 )
 
@@ -19,7 +18,7 @@ func audioWriter(commandsChannel <-chan []int) {
 	for {
 		select {
 		case chord = <-commandsChannel:
-			fmt.Println("received chord: ", chord)
+			// fmt.Println("received chord: ", chord)
 		default:
 		}
 		for i, _ := range buffer {
@@ -27,7 +26,7 @@ func audioWriter(commandsChannel <-chan []int) {
 			for _, k := range chord {
 				value += wave_function[(i*k)%bufferSize]
 			}
-			buffer[i] = int32(value)
+			buffer[i] = int32(value*maxInt32)
 		}
 		stream.Write()
 	}

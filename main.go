@@ -6,6 +6,7 @@ import (
 )
 
 func metronome(delay int, commandsChannel chan<- []int) {
+	fmt.Println("starting metronome")
 	for {
 		for i := 0; i < delay; i++ {
 			commandsChannel <- []int{16, 20, 23}
@@ -28,11 +29,8 @@ func main() {
 	Initialize()
 	defer Terminate()
 
-	/*
-		chordCommandsChannel := StartAudioWriter()
-		go metronome(10, chordCommandsChannel)
-		time.Sleep(10)
-	*/
+	chordCommandsChannel := StartAudioWriter()
+	go metronome(10, chordCommandsChannel)
 
 	audioBufferChannel := StartAudioListener()
 	for {
