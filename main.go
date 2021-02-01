@@ -1,7 +1,6 @@
 package main
 
 import (
-	"time"
 	"fmt"
 	"strings"
 )
@@ -19,6 +18,9 @@ func metronome(delay int, commandsChannel chan<- []int) {
 
 func getBar(x float64, width int) string {
 	barSize := int(x*float64(width))
+	if barSize > width {
+		barSize = width
+	}
 	return strings.Repeat("x", barSize) + strings.Repeat(" ", width-barSize)
 }
 
@@ -30,16 +32,15 @@ func main() {
 	/*
 	chordCommandsChannel := StartAudioWriter()
 	go metronome(10, chordCommandsChannel)
+	time.Sleep(10)
 	*/
 
-	time.Sleep(10)
 	audioBufferChannel := StartAudioListener()
 	for {
 		buffer := <-audioBufferChannel
-		//fmt.Println(buffer)
 		line := ""
 		for _, v := range(GetAmplitudes(buffer)[16:32]) {
-			line += getBar(v, 8) + "|"
+			line += getBar(v/2, 8) + "|"
 		}
 		fmt.Println(line)
 	}
