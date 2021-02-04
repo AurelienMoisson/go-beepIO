@@ -68,9 +68,17 @@ func main() {
 		},
 	)
 
-	audioListener := audioIO.StartAudioListener()
+	audioListener := audioIO.NewAudioListener()
+	if err := audioListener.Start(); err != nil {
+		panic(err)
+	}
+
 	for {
-		buffer := audioListener.GetAudioBuffer()
+		buffer, err := audioListener.Next()
+		if err != nil {
+			panic(err)
+		}
+
 		line := ""
 		amplitudes := audioIO.GetAmplitudes(buffer)
 		for _, v := range amplitudes[8:22] {

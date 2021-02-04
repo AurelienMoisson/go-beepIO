@@ -11,34 +11,38 @@ const (
 )
 
 type AudioListener struct {
-	bufferChannel <-chan []int32
+	stream *portaudio.Stream
+	buffer []int32
 }
 
-func audioListener(bufferChannel chan<- []int32) {
-
-	in := make([]int32, bufferSize)
-	stream, err := portaudio.OpenDefaultStream(1, 0, 44100, len(in), in)
-	chk(err)
-	defer stream.Close()
-
-	chk(stream.Start())
-	for {
-		chk(stream.Read())
-		select {
-		case bufferChannel <- in:
-		default:
-		}
+func NewAudioListener() *AudioListener {
+	return &AudioListener{
+		buffer: make([]int32, bufferSize),
 	}
 }
 
-func (audioListener *AudioListener) GetAudioBuffer() []int32 {
-	return <-audioListener.bufferChannel
+func (listener *AudioListener) Start() error {
+	var err error
+	listener.stream, err = portaudio.OpenDefaultStream(1, 0, 44100, len(listener.buffer), listener.buffer)
+	if err != nil {
+		return err
+	}
+
+	return listener.stream.Start()
 }
 
-func StartAudioListener() AudioListener {
-	bufferChannel := make(chan []int32)
-	go audioListener(bufferChannel)
-	return AudioListener{bufferChannel}
+
+func (listener *AudioListener) Stop() error {
+	return listener.stream.Close()
+}
+
+func (listener *AudioListener) Next() ([]int32, error) {
+	err := listener.stream.Read()
+	if err != nil {
+		return nil, err
+	}
+
+	return listener.buffer, nil
 }
 
 func chk(err error) {
