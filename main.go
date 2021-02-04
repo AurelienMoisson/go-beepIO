@@ -19,17 +19,17 @@ func metronome(delay int, commandsChannel chan<- []int) {
 	}
 }
 
-func sendMessage(audioWriter audioIO.AudioWriter, delay int, chord0,chord1 []int, msg []bool) {
+func sendMessage(audioWriter *audioIO.AudioWriter, delay int, chord0,chord1 []int, msg []bool) {
 	duration := time.Duration(delay) * time.Millisecond
 	for _, bit := range msg {
 		if bit {
-			audioWriter.WriteChord(chord0)
+			audioWriter.Chord = chord0
 		} else {
-			audioWriter.WriteChord(chord1)
+			audioWriter.Chord = chord1
 		}
 		time.Sleep(duration)
 	}
-	audioWriter.WriteChord([]int{})
+	audioWriter.Chord = []int{}
 }
 
 func getBar(x float64, width int) string {
@@ -44,7 +44,11 @@ func main() {
 	audioIO.Initialize()
 	defer audioIO.Terminate()
 
-	audioWriter := audioIO.StartAudioWriter()
+	audioWriter := audioIO.NewAudioWriter()
+	if err := audioWriter.Start(); err != nil {
+		panic(err)
+	}
+
 	// go metronome(10, chordCommandsChannel)
 	go sendMessage(audioWriter, 200, []int{8, 10}, []int{9, 11},
 		[]bool{
