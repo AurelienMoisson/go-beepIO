@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/AurelienMoisson/go-beepIO/audioIO"
 	"fmt"
 	"time"
 	"strings"
@@ -18,7 +19,7 @@ func metronome(delay int, commandsChannel chan<- []int) {
 	}
 }
 
-func sendMessage(audioWriter AudioWriter, delay int, chord0,chord1 []int, msg []bool) {
+func sendMessage(audioWriter audioIO.AudioWriter, delay int, chord0,chord1 []int, msg []bool) {
 	duration := time.Duration(delay) * time.Millisecond
 	for _, bit := range msg {
 		if bit {
@@ -40,10 +41,10 @@ func getBar(x float64, width int) string {
 }
 
 func main() {
-	Initialize()
-	defer Terminate()
+	audioIO.Initialize()
+	defer audioIO.Terminate()
 
-	audioWriter := StartAudioWriter()
+	audioWriter := audioIO.StartAudioWriter()
 	// go metronome(10, chordCommandsChannel)
 	go sendMessage(audioWriter, 200, []int{8, 10}, []int{9, 11},
 		[]bool{
@@ -67,15 +68,15 @@ func main() {
 		},
 	)
 
-	audioListener := StartAudioListener()
+	audioListener := audioIO.StartAudioListener()
 	for {
 		buffer := audioListener.GetAudioBuffer()
 		line := ""
-		amplitudes := GetAmplitudes(buffer)
+		amplitudes := audioIO.GetAmplitudes(buffer)
 		for _, v := range amplitudes[8:22] {
 			line += getBar(v/2, 8) + "|"
 		}
-		projections := GetProjections(amplitudes, [][]int{[]int{8,10}, []int{9,11}})
+		projections := audioIO.GetProjections(amplitudes, [][]int{[]int{8,10}, []int{9,11}})
 		projections_percents := []int{
 			int(projections[0] * 100.),
 			int(projections[1] * 100.),

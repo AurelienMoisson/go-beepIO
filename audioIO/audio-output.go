@@ -1,4 +1,4 @@
-package main
+package audioIO
 
 import (
 	"github.com/gordonklaus/portaudio"

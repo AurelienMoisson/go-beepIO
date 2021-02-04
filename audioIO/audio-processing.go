@@ -1,4 +1,4 @@
-package main
+package audioIO
 
 import (
 	"github.com/mjibson/go-dsp/fft"
