@@ -12,18 +12,18 @@ const (
 
 type AudioListener struct {
 	stream *portaudio.Stream
-	buffer []int32
+	callback func([]float64)
 }
 
-func NewAudioListener() *AudioListener {
+func NewAudioListener(callback func([]float64)) *AudioListener {
 	return &AudioListener{
-		buffer: make([]int32, bufferSize),
+		callback: callback,
 	}
 }
 
 func (listener *AudioListener) Start() error {
 	var err error
-	listener.stream, err = portaudio.OpenDefaultStream(1, 0, 44100, len(listener.buffer), listener.buffer)
+	listener.stream, err = portaudio.OpenDefaultStream(1, 0, sampleRate, bufferSize, listener.processAudio)
 	if err != nil {
 		return err
 	}
@@ -36,17 +36,12 @@ func (listener *AudioListener) Stop() error {
 	return listener.stream.Close()
 }
 
-func (listener *AudioListener) Next() ([]int32, error) {
-	err := listener.stream.Read()
-	if err != nil {
-		return nil, err
+func (listener *AudioListener) processAudio(in []float32){
+	buffer := make([]float64, len(in))
+
+	for i, sample := range in {
+		buffer[i] = float64(sample)
 	}
 
-	return listener.buffer, nil
-}
-
-func chk(err error) {
-	if err != nil {
-		panic(err)
-	}
+	listener.callback(buffer)
 }

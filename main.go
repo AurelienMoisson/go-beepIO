@@ -72,27 +72,27 @@ func main() {
 		},
 	)
 
-	audioListener := audioIO.NewAudioListener()
+	audioListener := audioIO.NewAudioListener(processAudio)
 	if err := audioListener.Start(); err != nil {
 		panic(err)
 	}
 
-	for {
-		buffer, err := audioListener.Next()
-		if err != nil {
-			panic(err)
-		}
+	<-make(chan struct{})
+}
 
-		line := ""
-		amplitudes := audioIO.GetAmplitudes(buffer)
-		for _, v := range amplitudes[8:22] {
-			line += getBar(v/2, 8) + "|"
-		}
-		projections := audioIO.GetProjections(amplitudes, [][]int{[]int{8,10}, []int{9,11}})
-		projections_percents := []int{
-			int(projections[0] * 100.),
-			int(projections[1] * 100.),
-		}
-		fmt.Println(line, " ", projections_percents)
+func processAudio(buffer []float64) {
+	line := ""
+
+	amplitudes := audioIO.GetAmplitudes(buffer)
+	for _, v := range amplitudes[8:22] {
+		line += getBar(v/2, 8) + "|"
 	}
+
+	projections := audioIO.GetProjections(amplitudes, [][]int{[]int{8,10}, []int{9,11}})
+	projections_percents := []int{
+		int(projections[0] * 100.),
+		int(projections[1] * 100.),
+	}
+
+	fmt.Println(line, " ", projections_percents)
 }

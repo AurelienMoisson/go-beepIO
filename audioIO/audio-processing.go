@@ -8,12 +8,8 @@ import (
 
 const maxInt32 = 2147483647
 
-func GetAmplitudes(buffer []int32) []float64 {
-	values := make([]float64, len(buffer))
-	for i, v := range buffer {
-		values[i] = float64(v) / maxInt32
-	}
-	fftValues := fft.FFTReal(values)
+func GetAmplitudes(buffer []float64) []float64 {
+	fftValues := fft.FFTReal(buffer)
 	amplitudes := make([]float64, len(fftValues))
 	for i, v := range fftValues {
 		amplitudes[i] = cmplx.Abs(v)
