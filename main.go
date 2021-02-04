@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 	"strings"
 )
 
@@ -12,9 +13,27 @@ func metronome(delay int, commandsChannel chan<- []int) {
 			commandsChannel <- []int{16, 20, 23}
 		}
 		for i := 0; i < delay; i++ {
-			commandsChannel <- []int{}
+			commandsChannel <- []int{18, 22, 25}
 		}
 	}
+}
+
+func sendMessage(commandsChannel chan<- []int, delay int, chord0,chord1 []int, msg []bool) {
+	duration := time.Duration(delay) * time.Millisecond
+	for _, bit := range msg {
+		if bit {
+			commandsChannel <- chord0
+			time.Sleep(duration)
+			commandsChannel <- chord1
+			time.Sleep(duration)
+		} else {
+			commandsChannel <- chord1
+			time.Sleep(duration)
+			commandsChannel <- chord0
+			time.Sleep(duration)
+		}
+	}
+	commandsChannel <- []int{}
 }
 
 func getBar(x float64, width int) string {
@@ -30,7 +49,28 @@ func main() {
 	defer Terminate()
 
 	chordCommandsChannel := StartAudioWriter()
-	go metronome(10, chordCommandsChannel)
+	// go metronome(10, chordCommandsChannel)
+	go sendMessage(chordCommandsChannel, 200, []int{8, 10}, []int{9, 11},
+		[]bool{
+			true,
+			true,
+			false,
+			true,
+			false,
+			false,
+			false,
+			true,
+			true,
+			false,
+			false,
+			false,
+			false,
+			true,
+			false,
+			true,
+			true,
+		},
+	)
 
 	audioBufferChannel := StartAudioListener()
 	for {
