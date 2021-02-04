@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/gordonklaus/portaudio"
-	"fmt"
 )
 
 type AudioWriter struct {
@@ -24,7 +23,6 @@ func audioWriterRoutine(bufferChannel <-chan []int32) {
 	for {
 		select {
 		case receivedBuffer = <-bufferChannel:
-			fmt.Println("received buffer: ", buffer)
 		default:
 		}
 		copy(buffer, receivedBuffer)

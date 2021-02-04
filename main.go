@@ -23,15 +23,10 @@ func sendMessage(audioWriter AudioWriter, delay int, chord0,chord1 []int, msg []
 	for _, bit := range msg {
 		if bit {
 			audioWriter.WriteChord(chord0)
-			time.Sleep(duration)
-			audioWriter.WriteChord(chord1)
-			time.Sleep(duration)
 		} else {
 			audioWriter.WriteChord(chord1)
-			time.Sleep(duration)
-			audioWriter.WriteChord(chord0)
-			time.Sleep(duration)
 		}
+		time.Sleep(duration)
 	}
 	audioWriter.WriteChord([]int{})
 }
