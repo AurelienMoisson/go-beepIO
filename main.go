@@ -18,22 +18,22 @@ func metronome(delay int, commandsChannel chan<- []int) {
 	}
 }
 
-func sendMessage(commandsChannel chan<- []int, delay int, chord0,chord1 []int, msg []bool) {
+func sendMessage(audioWriter AudioWriter, delay int, chord0,chord1 []int, msg []bool) {
 	duration := time.Duration(delay) * time.Millisecond
 	for _, bit := range msg {
 		if bit {
-			commandsChannel <- chord0
+			audioWriter.WriteChord(chord0)
 			time.Sleep(duration)
-			commandsChannel <- chord1
+			audioWriter.WriteChord(chord1)
 			time.Sleep(duration)
 		} else {
-			commandsChannel <- chord1
+			audioWriter.WriteChord(chord1)
 			time.Sleep(duration)
-			commandsChannel <- chord0
+			audioWriter.WriteChord(chord0)
 			time.Sleep(duration)
 		}
 	}
-	commandsChannel <- []int{}
+	audioWriter.WriteChord([]int{})
 }
 
 func getBar(x float64, width int) string {
@@ -48,9 +48,9 @@ func main() {
 	Initialize()
 	defer Terminate()
 
-	chordCommandsChannel := StartAudioWriter()
+	audioWriter := StartAudioWriter()
 	// go metronome(10, chordCommandsChannel)
-	go sendMessage(chordCommandsChannel, 200, []int{8, 10}, []int{9, 11},
+	go sendMessage(audioWriter, 200, []int{8, 10}, []int{9, 11},
 		[]bool{
 			true,
 			true,
@@ -72,15 +72,15 @@ func main() {
 		},
 	)
 
-	audioBufferChannel := StartAudioListener()
+	audioListener := StartAudioListener()
 	for {
-		buffer := <-audioBufferChannel
+		buffer := audioListener.GetAudioBuffer()
 		line := ""
 		amplitudes := GetAmplitudes(buffer)
-		for _, v := range amplitudes[10:32] {
+		for _, v := range amplitudes[8:22] {
 			line += getBar(v/2, 8) + "|"
 		}
-		projections := GetProjections(amplitudes, [][]int{[]int{16, 20, 23}, []int{18, 22, 25}})
+		projections := GetProjections(amplitudes, [][]int{[]int{8,10}, []int{9,11}})
 		projections_percents := []int{
 			int(projections[0] * 100.),
 			int(projections[1] * 100.),

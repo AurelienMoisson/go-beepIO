@@ -10,6 +10,10 @@ const (
 	baseFrequency = sampleRate / bufferSize
 )
 
+type AudioListener struct {
+	bufferChannel <-chan []int32
+}
+
 func audioListener(bufferChannel chan<- []int32) {
 
 	in := make([]int32, bufferSize)
@@ -27,10 +31,14 @@ func audioListener(bufferChannel chan<- []int32) {
 	}
 }
 
-func StartAudioListener() <-chan []int32 {
+func (audioListener *AudioListener) GetAudioBuffer() []int32 {
+	return <-audioListener.bufferChannel
+}
+
+func StartAudioListener() AudioListener {
 	bufferChannel := make(chan []int32)
 	go audioListener(bufferChannel)
-	return bufferChannel
+	return AudioListener{bufferChannel}
 }
 
 func chk(err error) {

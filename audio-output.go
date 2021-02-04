@@ -2,11 +2,16 @@ package main
 
 import (
 	"github.com/gordonklaus/portaudio"
+	"fmt"
 )
 
-var wave_function []float64
+type AudioWriter struct {
+	bufferChannel chan<- []int32
+}
 
-func audioWriter(commandsChannel <-chan []int) {
+var Wave_function []float64
+
+func audioWriterRoutine(bufferChannel <-chan []int32) {
 	buffer := make([]int32, bufferSize)
 
 	stream, err := portaudio.OpenDefaultStream(0, 1, 44100, bufferSize, buffer)
@@ -14,26 +19,37 @@ func audioWriter(commandsChannel <-chan []int) {
 
 	chk(stream.Start())
 
-	chord := []int{}
+	var receivedBuffer []int32
+
 	for {
 		select {
-		case chord = <-commandsChannel:
-			// fmt.Println("received chord: ", chord)
+		case receivedBuffer = <-bufferChannel:
+			fmt.Println("received buffer: ", buffer)
 		default:
 		}
-		for i, _ := range buffer {
-			value := 0.
-			for _, k := range chord {
-				value += wave_function[(i*k)%bufferSize]
-			}
-			buffer[i] = int32(value * maxInt32)
-		}
+		copy(buffer, receivedBuffer)
 		stream.Write()
 	}
 }
 
-func StartAudioWriter() chan<- []int {
-	commandsChannel := make(chan []int)
-	go audioWriter(commandsChannel)
-	return commandsChannel
+func (audioWriter *AudioWriter) WriteBuffer(buffer []int32) {
+	audioWriter.bufferChannel <- buffer
+}
+
+func (audioWriter *AudioWriter) WriteChord(chord []int) {
+	buffer := make([]int32, bufferSize)
+	for i, _ := range buffer {
+		value := 0.
+		for _, k := range chord {
+			value += Wave_function[(i*k)%bufferSize]
+		}
+		buffer[i] = int32(value * maxInt32)
+	}
+	audioWriter.WriteBuffer(buffer)
+}
+
+func StartAudioWriter() AudioWriter {
+	commandsChannel := make(chan []int32)
+	go audioWriterRoutine(commandsChannel)
+	return AudioWriter{commandsChannel}
 }
